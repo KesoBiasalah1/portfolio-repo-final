@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio Login/Register</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      bottom: 12px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: #999;
+      user-select: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .toggle-password:hover {
+      color: #5e60ce;
+    }
+    
+    .form-group-password {
+      position: relative;
+    }
+    
+    .alert {
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      font-weight: 500;
+      animation: slideDown 0.3s ease;
+      text-align: center;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .alert-error {
+      background-color: #fed7d7;
+      color: #c53030;
+      border: 2px solid #fc8181;
+    }
+    
+    .alert-success {
+      background-color: #c6f6d5;
+      color: #2f855a;
+      border: 2px solid #9ae6b4;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Login Form -->
+    <div class="form-box active" id="login-form">
+      <h2>Login to Keso</h2>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" name="email" placeholder="Enter your email" required/>
+        </div>
+        <div class="form-group form-group-password">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" name="password" placeholder="Enter your password" required/>
+          <span class="toggle-password" onclick="togglePassword('login-password', this)">👁 Show</span>
+        </div>
+        <div id="alert" class="alert"></div>
+        <button type="submit">Login</button>
+      </form>
+      <p class="center-text">
+        Don't have an account? 
+        <a href="#" onclick="showForm('register-form'); return false;">Register</a>
+      </p>
+    </div>
+
+    <!-- Register Form -->
+    <div class="form-box" id="register-form">
+      <h2>Register to Keso</h2>
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="register-username">Username</label>
+          <input type="text" id="register-username" name="username" placeholder="Enter your username" required/>
+        </div>
+        <div class="form-group">
+          <label for="register-email">Email</label>
+          <input type="email" id="register-email" name="email" placeholder="Enter your email" required/>
+        </div>
+        <div class="form-group form-group-password">
+          <label for="register-password">Password</label>
+          <input type="password" id="register-password" name="password" placeholder="Enter your password" required minlength="6"/>
+          <span class="toggle-password" onclick="togglePassword('register-password', this)">👁 Show</span>
+        </div>
+        <div class="form-group form-group-password">
+          <label for="register-confirm-password">Repeat Password</label>
+          <input type="password" id="register-confirm-password" name="confirmPassword" placeholder="Repeat your password" required minlength="6"/>
+          <span class="toggle-password" onclick="togglePassword('register-confirm-password', this)">👁 Show</span>
+        </div>
+        <div id="password-error" style="color: red; font-size: 14px; margin-top: -10px; display: none;">
+          Passwords do not match!
+        </div>
+        <div id="alert" class="alert"></div>
+        <button type="submit">Register</button>
+      </form>
+      <p class="center-text">
+        Already have an account? 
+        <a href="#" onclick="showForm('login-form'); return false;">Login</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Check if already logged in
+    if (localStorage.getItem('isLoggedIn') === 'true') {
+      window.location.href = 'home.html';
+    }
+
+    // Toggle between forms
+    function showForm(formId) {
+      document.querySelectorAll('.form-box').forEach(box => box.classList.remove('active'));
+      document.getElementById(formId).classList.add('active');
+      // Hide alert when switching forms
+      document.querySelectorAll('.alert').forEach(alert => alert.style.display = 'none');
+    }
+
+    // Show alert message
+    function showAlert(message, type) {
+      // Hide all alerts first
+      document.querySelectorAll('.alert').forEach(alert => alert.style.display = 'none');
+      
+      // alert in the active form
+      const activeForm = document.querySelector('.form-box.active');
+      const alert = activeForm.querySelector('.alert');
+      
+      alert.textContent = message;
+      alert.className = `alert alert-${type}`;
+      alert.style.display = 'block';
+      
+      setTimeout(() => {
+        alert.style.display = 'none';
+      }, 4000);
+    }
+
+    // Toggle password visibility
+    function togglePassword(inputId, icon) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = '🙈 Hide';
+      } else {
+        input.type = 'password';
+        icon.innerHTML = '👁 Show';
+      }
+    }
+
+    // password matching validation
+    const registerPassword = document.getElementById('register-password');
+    const confirmPassword = document.getElementById('register-confirm-password');
+    const passwordError = document.getElementById('password-error');
+
+    if (confirmPassword) {
+      confirmPassword.addEventListener('input', () => {
+        if (confirmPassword.value && registerPassword.value !== confirmPassword.value) {
+          passwordError.style.display = 'block';
+          confirmPassword.style.borderColor = 'red';
+        } else {
+          passwordError.style.display = 'none';
+          confirmPassword.style.borderColor = '';
+        }
+      });
+    }
+
+    // REGISTRATION 
+    document.getElementById('registerForm')?.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('register-username').value.trim();
+      const email = document.getElementById('register-email').value.trim();
+      const password = document.getElementById('register-password').value;
+      const confirm = document.getElementById('register-confirm-password').value;
+
+      // Validation
+      if (password !== confirm) {
+        showAlert('Passwords do not match!', 'error');
+        return;
+      }
+
+      if (password.length < 6) {
+        showAlert('Password must be at least 6 characters!', 'error');
+        return;
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showAlert('Invalid email format!', 'error');
+        return;
+      }
+
+      // Get existing users from localStorage
+      let users = [];
+      try {
+        users = JSON.parse(localStorage.getItem('users') || '[]');
+      } catch (e) {
+        console.error('Error parsing users:', e);
+        users = [];
+      }
+
+      // Check if user already exists
+      if (users.find(u => u.email === email)) {
+        showAlert('Email already registered!', 'error');
+        return;
+      }
+
+      if (users.find(u => u.username === username)) {
+        showAlert('Username already taken!', 'error');
+        return;
+      }
+
+      // Register new user
+      users.push({ username, email, password });
+      
+      try {
+        localStorage.setItem('users', JSON.stringify(users));
+        showAlert('Registration successful! Please login.', 'success');
+        
+        setTimeout(() => {
+          showForm('login-form');
+          document.getElementById('registerForm').reset();
+        }, 1500);
+      } catch (e) {
+        console.error('Error saving user:', e);
+        showAlert('Registration failed. Please try again.', 'error');
+      }
+    });
+
+    //  LOGIN 
+    document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      // Get users from localStorage
+      let users = [];
+      try {
+        users = JSON.parse(localStorage.getItem('users') || '[]');
+      } catch (e) {
+        console.error('Error parsing users:', e);
+      }
+
+      // Find matching user
+      const user = users.find(u => u.email === email && u.password === password);
+
+      if (user) {
+        // Login successful
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        showAlert('Login successful! Redirecting...', 'success');
+        
+        setTimeout(() => {
+          window.location.href = 'home.html';
+        }, 1000);
+      } else {
+        showAlert('Invalid email or password!', 'error');
+      }
+    });
+  </script>
+</body>
+</html>
